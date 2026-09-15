@@ -1,0 +1,116 @@
+{
+    "name": "ugarit/cashier",
+    "description": "Ugarit Cashier provides an expressive, fluent interface to Stripe's subscription billing services.",
+    "keywords": [
+        "ugarit",
+        "stripe",
+        "billing"
+    ],
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/ugarit/cashier/issues",
+        "source": "https://github.com/ugarit/cashier"
+    },
+    "authors": [
+        {
+            "name": "Muath R Abu Ouda",
+            "email": "muathrabuouda@hotmail.com",
+            "role": "Vision Leader of Ugarit"
+        },
+        {
+            "name": "Taylor Otwell",
+            "email": "taylor@laravel.com",
+            "role": "Original Creator & Primary Developer"
+        },
+        {
+            "name": "Dries Vints",
+            "email": "dries@ugarit.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "ext-json": "*",
+        "heritage/console": "^1.00.00",
+        "heritage/contracts": "^1.00.00",
+        "heritage/database": "^1.00.00",
+        "heritage/http": "^1.00.00",
+        "heritage/log": "^1.00.00",
+        "heritage/notifications": "^1.00.00",
+        "heritage/pagination": "^1.00.00",
+        "heritage/routing": "^1.00.00",
+        "heritage/support": "^1.00.00",
+        "heritage/view": "^1.00.00",
+        "moneyphp/money": "^4.0",
+        "nesbot/carbon": "^2.0|^3.0",
+        "stripe/stripe-php": "^17.4|^18.0|^19.0|^20.0|^21.0",
+        "symfony/console": "^6.0|^7.0|^8.0",
+        "symfony/http-kernel": "^6.0|^7.0|^8.0",
+        "symfony/polyfill-intl-icu": "^1.22.1",
+        "symfony/polyfill-php84": "^1.32"
+    },
+    "require-dev": {
+        "dompdf/dompdf": "^2.0|^3.0",
+        "orchestra/testbench": "^8.36|^9.15|^10.8|^11.0",
+        "phpstan/phpstan": "^1.10",
+        "spatie/ugarit-ray": "^1.40"
+    },
+    "suggest": {
+        "ext-intl": "Allows for more locales besides the default \"en\" when formatting money values.",
+        "dompdf/dompdf": "Required when generating and downloading invoice PDF's using Dompdf (^2.0|^3.0).",
+        "spatie/ugarit-pdf": "Required when generating and downloading invoice PDF's using Cashier's UgaritPdfInvoiceRenderer."
+    },
+    "autoload": {
+        "psr-4": {
+            "Ugarit\\Cashier\\": "src/",
+            "Ugarit\\Cashier\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ugarit\\Cashier\\Tests\\": "tests/",
+            "App\\": "workbench/app/",
+            "Database\\Factories\\": "workbench/database/factories/",
+            "Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "16.x-dev"
+        },
+        "ugarit": {
+            "providers": [
+                "Ugarit\\Cashier\\CashierServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "audit": {
+            "block-insecure": false
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ],
+        "lint": [
+            "@php vendor/bin/phpstan analyse --verbose --ansi"
+        ],
+        "test": [
+            "@clear",
+            "@php vendor/bin/phpunit"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "version": "1.00.00"
+}

@@ -1,0 +1,155 @@
+<?php
+
+namespace Ugarit\Cashier;
+
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
+use Heritage\Contracts\Support\Arrayable;
+use Heritage\Contracts\Support\Jsonable;
+use InvalidArgumentException;
+use JsonSerializable;
+use Ugarit\Cashier\Concerns\InteractsWithStripe;
+use Ugarit\Cashier\Enums\StripeApiVersions;
+use Stripe\Coupon as StripeCoupon;
+use Stripe\Discount as StripeDiscount;
+
+class Discount implements Arrayable, Jsonable, JsonSerializable
+{
+    use InteractsWithStripe;
+
+    /**
+     * Create a new Discount instance.
+     *
+     * @param  \Stripe\Discount  $discount
+     * @return void
+     */
+    public function __construct(protected StripeDiscount $discount)
+    {
+        //
+    }
+
+    /**
+     * Get the coupon applied to the discount.
+     *
+     * @return \Ugarit\Cashier\Coupon
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function coupon(): Coupon
+    {
+        $coupon = StripeApiVersions::current()->couponFromDiscount($this->discount);
+
+        if (is_null($coupon)) {
+            throw new InvalidArgumentException('Unable to retrieve coupon information for the discount.');
+        }
+
+        if (! $coupon instanceof StripeCoupon) {
+            $coupon = static::stripe()->coupons->retrieve($coupon);
+        }
+
+        return new Coupon($coupon);
+    }
+
+    /**
+     * Get the promotion code applied to create this discount.
+     *
+     * @return \Ugarit\Cashier\PromotionCode|null
+     */
+    public function promotionCode(): ?PromotionCode
+    {
+        if (is_null($this->discount->promotion_code)) {
+            return null;
+        }
+
+        // If promotion_code is already expanded as an object, use it...
+        if (is_object($this->discount->promotion_code) && isset($this->discount->promotion_code->id)) {
+            return new PromotionCode($this->discount->promotion_code);
+        }
+
+        // If promotion_code is just an ID string, fetch it from Stripe...
+        if (is_string($this->discount->promotion_code)) {
+            $promotionCode = static::stripe()->promotionCodes->retrieve($this->discount->promotion_code);
+
+            return new PromotionCode($promotionCode);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the date that the coupon was applied.
+     *
+     * @return \Carbon\CarbonInterface
+     */
+    public function start(): CarbonInterface
+    {
+        return Carbon::createFromTimestamp($this->discount->start);
+    }
+
+    /**
+     * Get the date that this discount will end.
+     *
+     * @return \Carbon\CarbonInterface|null
+     */
+    public function end(): ?CarbonInterface
+    {
+        if (! is_null($this->discount->end)) {
+            return Carbon::createFromTimestamp($this->discount->end);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the Stripe Discount instance.
+     *
+     * @return \Stripe\Discount
+     */
+    public function asStripeDiscount()
+    {
+        return $this->discount;
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return $this->asStripeDiscount()->toArray();
+    }
+
+    /**
+     * Convert the object to its JSON representation.
+     *
+     * @param  int  $options
+     * @return string
+     */
+    public function toJson($options = 0)
+    {
+        return json_encode($this->jsonSerialize(), $options);
+    }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array
+     */
+    #[\ReturnTypeWillChange]
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * Dynamically get values from the Stripe object.
+     *
+     * @param  string  $key
+     * @return mixed
+     */
+    public function __get(string $key)
+    {
+        return $this->discount->{$key};
+    }
+}

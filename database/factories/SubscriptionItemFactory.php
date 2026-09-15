@@ -1,0 +1,36 @@
+<?php
+
+namespace Ugarit\Cashier\Database\Factories;
+
+use Heritage\Database\Eloquent\Factories\Factory;
+use Heritage\Support\Str;
+use Ugarit\Cashier\Subscription;
+use Ugarit\Cashier\SubscriptionItem;
+
+class SubscriptionItemFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = SubscriptionItem::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'subscription_id' => Subscription::factory(),
+            'stripe_id' => 'si_'.Str::random(40),
+            'stripe_product' => 'prod_'.Str::random(40),
+            'stripe_price' => 'price_'.Str::random(40),
+            'meter_id' => null,
+            'quantity' => null,
+            'meter_event_name' => null,
+        ];
+    }
+}
